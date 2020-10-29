@@ -9,12 +9,15 @@ from network import network
 from pose_prediction import predictor
 from datasets import base_dataset
 
+import collections
+Camera = collections.namedtuple(
+    "Camera", ["id", "model", "width", "height", "params"])
 
 # Argparse
 parser = argparse.ArgumentParser(
     description = 'Sparse-to-dense Hypercolumn Matching')
 parser.add_argument(
-    '--dataset', type=str, choices=['robotcar', 'cmu'], required=True)
+    '--dataset', type=str, required=True)
 parser.add_argument(
     '--gpu-id', help='GPU ID, if not specified all available GPUs will be used')
 parser.add_argument(

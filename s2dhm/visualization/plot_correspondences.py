@@ -4,6 +4,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import List
+from PIL import Image
+
+import matplotlib
+matplotlib.use('agg')
 
 
 @gin.configurable
@@ -13,8 +17,8 @@ def plot_image_retrieval(left_image_path: str,
                          export_folder: str,
                          export_filename: str):
     """Display (query, nearest-neighbor) pairs of images."""
-    left_image = cv2.cvtColor(cv2.imread(left_image_path), cv2.COLOR_BGR2RGB)
-    right_image = cv2.cvtColor(cv2.imread(right_image_path), cv2.COLOR_BGR2RGB)
+    left_image = np.array(Image.open(left_image_path))
+    right_image = np.array(Image.open(right_image_path))
     Path(export_folder, export_filename).parent.mkdir(exist_ok=True, parents=True)
     height = max(left_image.shape[0], right_image.shape[0])
     width = left_image.shape[1] + right_image.shape[1]
@@ -38,8 +42,8 @@ def plot_correspondences(left_image_path: str,
                          export_folder: str,
                          export_filename: str):
     """Display feature correspondences."""
-    left_image = cv2.cvtColor(cv2.imread(left_image_path), cv2.COLOR_BGR2RGB)
-    right_image = cv2.cvtColor(cv2.imread(right_image_path), cv2.COLOR_BGR2RGB)
+    left_image = np.array(Image.open(left_image_path))
+    right_image = np.array(Image.open(right_image_path))
     Path(export_folder, export_filename).parent.mkdir(exist_ok=True, parents=True)
     height = max(left_image.shape[0], right_image.shape[0])
     width = left_image.shape[1] + right_image.shape[1]
@@ -58,7 +62,9 @@ def plot_correspondences(left_image_path: str,
     plt.imshow(output)
     plt.title(title)
     plt.axis('off')
-    fig.savefig(str(Path(export_folder, export_filename)))
+    p_out = str(Path(export_folder, export_filename).absolute())
+    print(f"Saved output to {p_out}")
+    fig.savefig(p_out)
     plt.close(fig)
 
 @gin.configurable
@@ -70,8 +76,8 @@ def plot_detections(left_image_path: str,
                     export_folder: str,
                     export_filename: str):
     """Display Superpoint detections."""
-    left_image = cv2.cvtColor(cv2.imread(left_image_path), cv2.COLOR_BGR2RGB)
-    right_image = cv2.cvtColor(cv2.imread(right_image_path), cv2.COLOR_BGR2RGB)
+    left_image = np.array(Image.open(left_image_path))
+    right_image = np.array(Image.open(right_image_path))
     Path(export_folder, export_filename).parent.mkdir(exist_ok=True, parents=True)
 
     height = max(left_image.shape[0], right_image.shape[0])

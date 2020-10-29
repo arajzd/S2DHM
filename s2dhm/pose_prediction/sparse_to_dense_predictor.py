@@ -74,6 +74,12 @@ class SparseToDensePredictor(predictor.PosePredictor):
                 nearest_neighbor = self._dataset.data['reference_image_names'][j]
                 local_reconstruction = \
                     self._filename_to_local_reconstruction[nearest_neighbor]
+
+                n_points_2d = len(local_reconstruction.points_2D)
+                if n_points_2d < 3:
+                    print(f"Skipping {nearest_neighbor}. No 2d points")
+                    continue
+
                 reference_sparse_hypercolumns, cell_size = \
                     self._compute_sparse_reference_hypercolumn(
                         nearest_neighbor, local_reconstruction)

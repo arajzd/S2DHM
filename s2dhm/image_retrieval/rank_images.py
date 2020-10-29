@@ -30,7 +30,7 @@ def fetch_ranks(file_path: str,
                 network: network.ImageRetrievalModel):
     """Retrieve pre-computed image ranks."""
     # Load numpy file
-    numpy_file = np.load(file_path)
+    numpy_file = np.load(file_path, allow_pickle=True)
 
     # Check if reference and query images match the found images
     query_images = list(numpy_file['query_images'])

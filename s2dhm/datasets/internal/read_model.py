@@ -297,7 +297,7 @@ def rotmat2qvec(R):
     return qvec
 
 
-def convert_to_npz(cameras, images, points3D, dataset_path):
+def convert_to_npz(cameras, images, points3D, triangulation_file_path):
     kwargs = {image.name: np.array({'image_id': image.id, 'camera_id': image.camera_id,
                                     'K': cameras[image.camera_id], 'points2D': np.squeeze(
             np.asarray([image.xys[idx] for idx in np.where(image.point3D_ids != -1)])),
@@ -305,7 +305,8 @@ def convert_to_npz(cameras, images, points3D, dataset_path):
                                     'points3D': np.asarray([points3D[point_id].xyz for point_id in image.point3D_ids if
                                                             (point_id != -1)])})
               for image in images.values()}
-    np.savez("../../../data/triangulation/" + dataset_path + '.npz', **kwargs)
+    os.makedirs(os.path.dirname(triangulation_file_path), exist_ok=True)
+    np.savez(triangulation_file_path, **kwargs)
 
 
 def main():
@@ -315,7 +316,7 @@ def main():
 
     cameras, images, points3D = read_model(path=sys.argv[1], ext=sys.argv[2])
 
-    convert_to_npz(cameras, images, points3D, dataset_path=sys.argv[3])
+    convert_to_npz(cameras, images, points3D, triangulation_file_path=sys.argv[3])
 
 
 if __name__ == "__main__":
