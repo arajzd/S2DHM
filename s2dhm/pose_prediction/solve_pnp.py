@@ -5,7 +5,8 @@ from collections import namedtuple
 from pose_prediction import matrix_utils
 
 Prediction = namedtuple('Prediction',
-    'success num_matches num_inliers reference_inliers query_inliers quaternion matrix reference_filename reference_keypoints')
+                        'success num_matches num_inliers reference_inliers query_inliers quaternion matrix '
+                        'reference_filename reference_keypoints points_3d_inliers')
 
 
 @gin.configurable
@@ -53,7 +54,8 @@ def solve_pnp(points_2D: np.ndarray,
             quaternion=None,
             matrix=None,
             reference_filename=reference_filename,
-            reference_keypoints=reference_keypoints)
+            reference_keypoints=reference_keypoints,
+            points_3d_inliers=None)
 
     if success and len(inliers) >= minimum_inliers:
         success, rvec, tvec = cv2.solvePnP(
@@ -73,7 +75,8 @@ def solve_pnp(points_2D: np.ndarray,
             quaternion=quaternion,
             matrix=matrix,
             reference_filename=reference_filename,
-            reference_keypoints=reference_keypoints)
+            reference_keypoints=reference_keypoints,
+            points_3d_inliers=np.squeeze(points_3D[np.squeeze(inliers)]))
     else:
         return Prediction(
             success=False,
@@ -84,4 +87,5 @@ def solve_pnp(points_2D: np.ndarray,
             quaternion=None,
             matrix=None,
             reference_filename=reference_filename,
-            reference_keypoints=reference_keypoints)
+            reference_keypoints=reference_keypoints,
+            points_3d_inliers=None)

@@ -9,6 +9,8 @@ from pose_prediction import predictor
 from pose_prediction import solve_pnp
 from pose_prediction import keypoint_association
 from pose_prediction import exhaustive_search
+import os
+from pathlib import Path
 from visualization import plot_correspondences
 
 
@@ -61,6 +63,10 @@ class SparseToDensePredictor(predictor.PosePredictor):
             query_image = self._dataset.data['query_image_names'][i]
             if query_image not in self._filename_to_intrinsics:
                 continue
+            query_image_name = query_image.split("/")[-1]
+            f = open(Path("/", Path(*query_image.split("/")[:-3]), "2d_3d_matches", query_image_name + ".s2dhm.txt"),
+                     "w")
+
             query_dense_hypercolumn, _ = self._network.compute_hypercolumn(
                 [query_image], to_cpu=False, resize=True)
             channels, width, height = query_dense_hypercolumn.shape[1:]
@@ -96,7 +102,7 @@ class SparseToDensePredictor(predictor.PosePredictor):
                 points_2D = np.reshape(
                     matches_2D.cpu().numpy()[mask], (-1, 1, 2))
                 points_3D = np.reshape(
-                    local_reconstruction.points_3D[mask], (-1, 1, 3))
+                    np.array(local_reconstruction.points_3D)[mask], (-1, 1, 3))
                 distortion_coefficients = \
                     local_reconstruction.distortion_coefficients
                 intrinsics = local_reconstruction.intrinsics
@@ -121,6 +127,21 @@ class SparseToDensePredictor(predictor.PosePredictor):
             if len(predictions):
                 export, best_prediction = self._choose_best_prediction(
                     predictions, query_image)
+
+                points_2d_inliers = best_prediction.query_inliers
+                points_3d_inliers = best_prediction.points_3d_inliers
+                for point_2d, point_3d in zip(points_2d_inliers, points_3d_inliers):
+                    f.write("{} {} ".format(*point_2d))
+                    f.write("{} {} {}\n".format(*point_3d))
+
+                #np.savez("/home/ara/PycharmProjects/HyperColumn/S2DHM/results/"+best_prediction.reference_filename.split("/")[-1].split(".")[0]+".npz",
+                #         best_prediction.reference_inliers)
+                #np.savez("/home/ara/PycharmProjects/HyperColumn/S2DHM/results/"+query_image.split("/")[-1].split(".")[0]+".npz",
+                #        best_prediction.query_inliers)
+
+                #query_name = query_info.name.split("/")[1]
+                #f = open(Path(matches_path, query_name + ".hfnet.txt"), "w")
+
                 if self._log_images:
                     if np.ndim(np.squeeze(best_prediction.query_inliers)):
                         self._plot_inliers(
@@ -144,7 +165,7 @@ class SparseToDensePredictor(predictor.PosePredictor):
                 tqdm_bar.set_description(
                     "[{} inliers]".format(best_prediction.num_inliers))
                 tqdm_bar.refresh()
-
+        f.close()
         return output
 
     @property

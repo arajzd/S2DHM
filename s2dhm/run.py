@@ -4,14 +4,19 @@ import torch
 import argparse
 import logging
 import numpy as np
+import collections
 from image_retrieval import rank_images
 from network import network
 from pose_prediction import predictor
 from datasets import base_dataset
 
-import collections
 Camera = collections.namedtuple(
     "Camera", ["id", "model", "width", "height", "params"])
+BaseImage = collections.namedtuple(
+    "Image", ["id", "qvec", "tvec", "camera_id", "name", "xys", "point3D_ids"])
+Point3D = collections.namedtuple(
+    "Point3D", ["id", "xyz", "rgb", "error", "image_ids", "point2D_idxs"])
+
 
 # Argparse
 parser = argparse.ArgumentParser(
@@ -73,6 +78,8 @@ def main(args):
     device = torch.device('cuda' if torch.cuda.is_available() else "cpu")
 
     # Load gin config based on dataset name
+    print(args.mode, args.dataset)
+    print('configs/runs/run_{}_on_{}.gin'.format(args.mode, args.dataset))
     gin.parse_config_file(
         'configs/runs/run_{}_on_{}.gin'.format(args.mode, args.dataset))
 
